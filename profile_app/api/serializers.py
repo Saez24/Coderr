@@ -7,15 +7,15 @@ class UserSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['pk', 'username', 'first_name', 'last_name']
 
-        def get_user(self, obj):
-            user_id = serializers.SerializerMethodField()
-            profile = Profile.objects.get(id=user_id)
-            return {
-                'pk': user_id,
-                'username': profile .username,
-                'first_name': profile .first_name,
-                'last_name': profile .last_name,
-            }
+        # def get_user(self, obj):
+        #     user_id = serializers.SerializerMethodField()
+        #     profile = Profile.objects.get(id=user_id)
+        #     return {
+        #         'pk': user_id,
+        #         'username': profile .username,
+        #         'first_name': profile .first_name,
+        #         'last_name': profile .last_name,
+        #     }
 
 
 class ProfileSerializer(serializers.ModelSerializer):

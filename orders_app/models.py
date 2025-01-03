@@ -1,4 +1,5 @@
 from django.db import models
+from profile_app.models import Profile
 
 
 class Order(models.Model):
@@ -8,8 +9,10 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
-    customer_user = models.IntegerField()
-    business_user = models.IntegerField()
+    customer_user = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name='customer_orders')
+    business_user = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name='business_orders')
     title = models.CharField(max_length=255)
     revisions = models.IntegerField(default=0)
     delivery_time_in_days = models.PositiveIntegerField()

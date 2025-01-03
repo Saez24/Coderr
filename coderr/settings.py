@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'profile_app',
     'registration_app',
     'reviews_app',
+    'admin_app',
 ]
 
 MIDDLEWARE = [
