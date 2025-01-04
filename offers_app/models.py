@@ -21,7 +21,7 @@ class OfferDetail(models.Model):
 
 class Offer(models.Model):
     user = models.ForeignKey(
-        Profile, on_delete=models.CASCADE,  blank=True, null=True)
+        Profile, on_delete=models.CASCADE,  blank=True, null=True, related_name='offers')
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='profile_pictures/', null=True, )
     description = models.TextField()

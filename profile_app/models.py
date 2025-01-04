@@ -1,9 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Profile(models.Model):
-    # Kann leer sein, bis `pk` zugewiesen wird
-    user = models.IntegerField(blank=True, null=True)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, blank=True, null=True, related_name='profile')
     username = models.CharField(max_length=100, default="")
     first_name = models.CharField(max_length=100, default="")
     last_name = models.CharField(max_length=100, default="", blank=True)
@@ -18,11 +19,5 @@ class Profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if not self.user:
-            self.user = self.pk
-            super().save(update_fields=['user'])
-
     def __str__(self):
-        return self.username
+        return self.username or self.user.username

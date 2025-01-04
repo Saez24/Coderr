@@ -27,33 +27,66 @@ class OfferSerializer(serializers.ModelSerializer):
         return limited_data
 
     def create(self, validated_data):
+        print("Validated Data:", validated_data)  # Debugging
         details_data = validated_data.pop('details', [])
-        if len(details_data) != 3:
-            raise serializers.ValidationError(
-                "An offer must have exactly three details (basic, standard, premium).")
-        offer = Offer.objects.create(**validated_data)
+
+    # Konvertiere die Datentypen für Details
+        for detail in details_data:
+            detail['revisions'] = int(detail['revisions'])
+            detail['delivery_time_in_days'] = int(
+                detail['delivery_time_in_days'])
+            detail['price'] = float(detail['price'])
+
+    # User-ID in Profile-Objekt konvertieren
+        user_id = validated_data.pop('user')
+        user_profile = Profile.objects.get(id=user_id)
+
+    # Offer erstellen
+        offer = Offer.objects.create(user=user_profile, **validated_data)
+
+    # Minimum Werte berechnen
         offer.min_price = min(item['price'] for item in details_data)
         offer.min_delivery_time = min(
             item['delivery_time_in_days'] for item in details_data)
-        offer.user_details = generate_user_data(offer.user)
+        offer.user_details = generate_user_data(user_profile)
+
+    # Details erstellen
         generate_offer_detail(details_data, offer)
         offer.save()
         return offer
 
+    def perform_create(self, serializer):
+        user_profile = Profile.objects.get(
+            user=self.request.user)  # Profile-Objekt holen
+        serializer.save(user=user_profile)
+
     def update(self, instance, validated_data):
         details_data = validated_data.pop('details', [])
-        instance.min_price = min(item['price'] for item in details_data)
-        instance.min_delivery_time = min(
-            item['delivery_time_in_days'] for item in details_data)
+
         if details_data:
-            instance.details = []
-            for detail_data in details_data:
-                detail_serializer = OfferDetailSerializer(data=detail_data)
-                detail_serializer.is_valid(raise_exception=True)
-                detail = detail_serializer.save()
-                detail_url = str(f"/offerdetails/{detail.pk}/")
-                instance.details.append({"id": detail.pk, "url": detail_url, "title": detail_data['title'], "revisions": detail_data['revisions'],  "delivery_time_in_days": detail_data[
-                                        'delivery_time_in_days'], "price": detail_data['price'],  "features": detail_data['features'],  "offer_type": detail_data['offer_type']})
+            # Vorhandene Details löschen
+            OfferDetail.objects.filter(user=instance.user).delete()
+
+        # Neue Details hinzufügen
+        instance.details = []
+        for detail_data in details_data:
+            detail_serializer = OfferDetailSerializer(data=detail_data)
+            detail_serializer.is_valid(raise_exception=True)
+            detail = detail_serializer.save(user=instance.user)
+
+            detail_url = f"/offerdetails/{detail.pk}/"
+            instance.details.append({
+                "id": detail.pk,
+                "url": detail_url,
+                "title": detail_data['title'],
+                "revisions": detail_data['revisions'],
+                "delivery_time_in_days": detail_data['delivery_time_in_days'],
+                "price": detail_data['price'],
+                "features": detail_data['features'],
+                "offer_type": detail_data['offer_type']
+            })
+
+    # Andere Felder aktualisieren
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -62,17 +95,30 @@ class OfferSerializer(serializers.ModelSerializer):
 
 def generate_offer_detail(details_data, offer):
     for detail_data in details_data:
-        detail_data['user'] = offer.user
+        print("Creating detail:", detail_data)  # Debugging
+        # Nutzer als Primärschlüssel setzen
+        detail_data['user'] = offer.user.pk
         detail_serializer = OfferDetailSerializer(data=detail_data)
-        detail_serializer.is_valid(raise_exception=True)
-        detail = detail_serializer.save()
-        detail_url = str(f"/offerdetails/{detail.pk}/")
-        offer.details.append({"id": detail.pk, "url": detail_url, "title": detail_data['title'], "revisions": detail_data['revisions'],  "delivery_time_in_days": detail_data[
-                             'delivery_time_in_days'], "price": detail_data['price'],  "features": detail_data['features'],  "offer_type": detail_data['offer_type']})
+        if not detail_serializer.is_valid():
+            print("Validation Error:", detail_serializer.errors)  # Fehler loggen
+            raise ValueError(detail_serializer.errors)  # Fehler werfen
+        detail = detail_serializer.save()  # Detail speichern
+        detail_url = f"/offerdetails/{detail.pk}/"
+        offer.details.append({
+            "id": detail.pk,
+            "url": detail_url,
+            "title": detail_data['title'],
+            "revisions": detail_data['revisions'],
+            "delivery_time_in_days": detail_data['delivery_time_in_days'],
+            "price": detail_data['price'],
+            "features": detail_data['features'],
+            "offer_type": detail_data['offer_type'],
+        })
+    offer.save()
 
 
-def generate_user_data(user_id):
-    profile = Profile.objects.get(id=user_id)
+def generate_user_data(profile):
+
     return {
         'first_name': profile.first_name,
         'last_name': profile.last_name,

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from orders_app.models import Order
 from profile_app.models import Profile
-from offers_app.models import Offer
+from offers_app.models import Offer, OfferDetail
 from reviews_app.models import Review
 
 
@@ -28,6 +28,14 @@ class OfferProxy(Offer):
         app_label = 'admin_app'
         verbose_name = 'Angebot'
         verbose_name_plural = 'Angebote'
+
+
+class OfferDetailProxy(OfferDetail):
+    class Meta:
+        proxy = True
+        app_label = 'admin_app'
+        verbose_name = 'Angebot-Details'
+        verbose_name_plural = 'Angebot-Details'
 
 
 class ReviewProxy(Review):
@@ -67,8 +75,22 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 class OfferAdmin(admin.ModelAdmin):
-    list_display = ('user_first_name', 'user_last_name',
+    list_display = ('user',
                     'title', 'created_at', 'min_price')
+
+    def user_first_name(self, obj):
+        return obj.user.first_name if obj.user else "-"
+    user_first_name.short_description = 'Vorname'
+
+    def user_last_name(self, obj):
+
+        return obj.user.last_name if obj.user else "-"
+    user_last_name.short_description = 'Nachname'
+
+
+class OfferDetailAdmin(admin.ModelAdmin):
+    list_display = ('user',
+                    'title', 'offer_type', 'price')
 
     def user_first_name(self, obj):
         return obj.user.first_name if obj.user else "-"
@@ -90,6 +112,7 @@ admin.site.register(ProfileProxy, ProfileAdmin)
 admin.site.register(OrderProxy, OrderAdmin)
 admin.site.register(OfferProxy, OfferAdmin)
 admin.site.register(ReviewProxy, ReviewAdmin)
+admin.site.register(OfferDetailProxy, OfferDetailAdmin)
 
 # Admin-Panel Einstellungen
 admin.site.site_header = 'Coderr Verwaltung'

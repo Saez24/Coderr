@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from profile_app.models import Profile
-from .serializers import ProfileSerializer
+from .serializers import ProfileSerializer, UserSerializer
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError
@@ -66,12 +66,8 @@ class ProfileCustomerViewSets(APIView):
         return_data_customer_profiles = []
         for profile in customer_profiles:
             return_data_customer_profiles.append({
-                "user": {
-                    "pk": profile.user,
-                    "username": profile.username,
-                    "first_name": profile.first_name,
-                    "last_name": profile.last_name,
-                },
+                # Verwende UserSerializer
+                "user": UserSerializer(profile.user).data,
                 "file": profile.file.url if profile.file else None,
                 "uploaded_at": profile.uploaded_at,
                 "type": profile.type
@@ -87,12 +83,8 @@ class ProfileBusinessViewSets(APIView):
         return_data_business_profiles = []
         for profile in business_profiles:
             return_data_business_profiles.append({
-                "user": {
-                    "pk": profile.user,
-                    "username": profile.username,
-                    "first_name": profile.first_name,
-                    "last_name": profile.last_name,
-                },
+                # Verwende UserSerializer
+                "user": UserSerializer(profile.user).data,
                 "file": profile.file.url if profile.file else None,
                 "location": profile.location,
                 "tel": profile.tel,

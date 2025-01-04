@@ -51,11 +51,22 @@ def generate_profile(request, saved_account):
     user.last_name = last_name_registration
     user.save()
 
-    Profile.objects.create(
-        user=saved_account.pk,
-        username=saved_account.username,
-        first_name=first_name_registration,
-        last_name=last_name_registration,
-        email=saved_account.email,
-        type=profile_type,
+    # Überprüfe, ob bereits ein Profil existiert
+    profile, created = Profile.objects.get_or_create(
+        user=saved_account,
+        defaults={
+            'username': saved_account.username,
+            'first_name': first_name_registration,
+            'last_name': last_name_registration,
+            'email': saved_account.email,
+            'type': profile_type,
+        }
     )
+
+    if not created:
+        profile.username = saved_account.username
+        profile.first_name = first_name_registration
+        profile.last_name = last_name_registration
+        profile.email = saved_account.email
+        profile.type = profile_type
+        profile.save()

@@ -25,12 +25,14 @@ class CreateOrderSerializer(serializers.Serializer):
     def create(self, validated_data):
         offer_detail = OfferDetail.objects.get(
             pk=validated_data['offer_detail_id'])
-        customer_user = self.context['request'].user.pk
-        business_user = offer_detail.user
+
+    # Hole das Profile-Objekt für den customer_user und business_user
+        customer_user_profile = self.context['request'].user.profile
+        business_user_profile = offer_detail.user  # Dies ist ein Profile-Objekt
 
         return Order.objects.create(
-            customer_user=customer_user,
-            business_user=business_user,
+            customer_user=customer_user_profile,  # Übergib das Profile-Objekt
+            business_user=business_user_profile,  # Auch hier das Profile-Objekt
             title=offer_detail.title,
             revisions=offer_detail.revisions,
             delivery_time_in_days=offer_detail.delivery_time_in_days,

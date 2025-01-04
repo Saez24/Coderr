@@ -5,6 +5,7 @@ from .permissions import IsCustomerProfile, IsReviewerOrAdmin
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import ReviewSerializer
 from reviews_app.models import Review
+from rest_framework.exceptions import ValidationError
 
 
 class ReviewListCreateView(generics.ListCreateAPIView):
@@ -22,12 +23,25 @@ class ReviewListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Review.objects.all()
         reviewer_id = self.request.query_params.get('reviewer_id')
-        business_user_id = self.request.query_params.get(
-            'business_user_id')
+        business_user_id = self.request.query_params.get('business_user_id')
+
+    # Sicherstellen, dass reviewer_id eine Zahl ist
         if reviewer_id:
-            queryset = queryset.filter(reviewer=reviewer_id)
+            try:
+                reviewer_id = int(reviewer_id)  # Umwandlung in eine ganze Zahl
+                queryset = queryset.filter(reviewer=reviewer_id)
+            except ValueError:
+                raise ValidationError(
+                    "Der Parameter 'reviewer_id' muss eine Zahl sein.")
+
         if business_user_id:
-            queryset = queryset.filter(business_user=business_user_id)
+            try:
+                business_user_id = int(business_user_id)
+                queryset = queryset.filter(business_user=business_user_id)
+            except ValueError:
+                raise ValidationError(
+                    "Der Parameter 'business_user_id' muss eine Zahl sein.")
+
         return queryset
 
     def perform_create(self, serializer):
