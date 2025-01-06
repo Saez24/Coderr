@@ -42,15 +42,7 @@ This is the backend for the Coderr application, developed with Django and the Dj
    python manage.py create_users.py
    ```
 
-   \*\*\*Customer-User
-   Username: andrey
-   Password: asdasd
-
-   \*\*\*Businnes-User
-   Username: kevin
-   Password: asdasd24
-
-   |               | Username | Password |
+   | Users         | Username | Password |
    | ------------- | -------- | -------- |
    | Customer-User | andrey   | asdasd   |
    | Business-User | kevin    | asdasd24 |
@@ -65,8 +57,9 @@ This is the backend for the Coderr application, developed with Django and the Dj
 
    The Backend will be accessible at `http://127.0.0.1:8000/admin`.
 
-   Username: admin
-   Password: admin123
+   | Superusers | Username | Password |
+   | ---------- | -------- | -------- |
+   | Admin      | admin    | admin123 |
 
 ## Applications
 
@@ -79,18 +72,6 @@ The project consists of several Django applications:
 - **profile_app:** User profiles.
 - **registration_app:** User registration.
 - **reviews_app:** Management of reviews.
-
-## API Endpoints
-
-The API endpoints are available at `/api/`. A detailed documentation of the available endpoints and their usage will be provided soon.
-
-## Tests
-
-To run the test suite:
-
-```bash
-python manage.py test
-```
 
 ## Contributing
 
