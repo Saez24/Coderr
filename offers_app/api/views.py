@@ -7,10 +7,10 @@ from rest_framework import viewsets, filters
 from .pagination import CustomPageNumberPagination
 from .permissions import IsOwnerOrAdmin, IsBusinessProfile
 from decimal import Decimal, InvalidOperation
+from profile_app.models import Profile
 
 
 class OfferViewSet(viewsets.ModelViewSet):
-    queryset = Offer.objects.all()
     serializer_class = OfferSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPageNumberPagination
@@ -28,20 +28,19 @@ class OfferViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        queryset = Offer.objects.all()
-        user_id = self.request.query_params.get('creator_id')
+        user_profile = self.request.user.profile
+        if user_profile.type == "business":
+            queryset = Offer.objects.filter(user=user_profile)
+        else:
+            queryset = Offer.objects.all()
+
         min_price = self.request.query_params.get('min_price')
-        max_delivery_time = self.request.query_params.get(
-            'max_delivery_time')
+        max_delivery_time = self.request.query_params.get('max_delivery_time')
         search = self.request.query_params.get('search')
         ordering = self.request.query_params.get('ordering', '-updated_at')
 
-        if user_id:
-            queryset = queryset.filter(user=user_id)
-
         if min_price:
             try:
-                # Konvertiere den Wert in Decimal und formatiere auf 2 Dezimalstellen
                 min_price = Decimal(min_price).quantize(Decimal('0.01'))
                 queryset = queryset.filter(min_price__gte=min_price)
             except (ValueError, InvalidOperation):
@@ -57,8 +56,7 @@ class OfferViewSet(viewsets.ModelViewSet):
 
         if search:
             queryset = queryset.filter(
-                Q(title__icontains=search) | Q(
-                    description__icontains=search)
+                Q(title__icontains=search) | Q(description__icontains=search)
             )
 
         valid_ordering_fields = ['updated_at',
@@ -71,7 +69,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user.pk)
+        serializer.save(user=self.request.user.profile)
 
     def perform_destroy(self, instance):
         instance.delete()

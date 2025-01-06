@@ -11,7 +11,6 @@ from django.db import models
 
 
 class OrderListView(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
@@ -24,26 +23,12 @@ class OrderListView(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    def get(self, request, *args, **kwargs):
-        user = self.request.user
-    # Hole das Profil des authentifizierten Benutzers
-        user_profile = user.profile  # Das Profil ist über das User-Modell verknüpft
-
-    # Filtere Bestellungen, bei denen der authentifizierte Benutzer entweder der customer_user oder business_user ist
-        orders = Order.objects.filter(
+    def get_queryset(self):
+        user_profile = self.request.user.profile
+        return Order.objects.filter(
             models.Q(customer_user=user_profile) | models.Q(
                 business_user=user_profile)
         )
-
-    # Wenn keine Bestellungen gefunden werden, gib eine 404 zurück
-        if not orders.exists():
-            return Response({
-                "message": "No orders found."
-            }, status=status.HTTP_404_NOT_FOUND)
-
-    # Serialisiere die Bestellungen und gebe sie zurück
-        serializer = self.get_serializer(orders, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         serializer = CreateOrderSerializer(
