@@ -42,11 +42,6 @@ This is the backend for the Coderr application, developed with Django and the Dj
    python manage.py create_users.py
    ```
 
-   | Users         | Username | Password |
-   | ------------- | -------- | -------- |
-   | Customer-User | andrey   | asdasd   |
-   | Business-User | kevin    | asdasd24 |
-
 6. **Start the development server:**
 
    ```bash
@@ -60,6 +55,11 @@ This is the backend for the Coderr application, developed with Django and the Dj
    | Superusers | Username | Password |
    | ---------- | -------- | -------- |
    | Admin      | admin    | admin123 |
+
+   | Users         | Username | Password |
+   | ------------- | -------- | -------- |
+   | Customer-User | andrey   | asdasd   |
+   | Business-User | kevin    | asdasd24 |
 
 ## Applications
 
