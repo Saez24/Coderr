@@ -25,16 +25,25 @@ class OrderListView(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get(self, request, *args, **kwargs):
-        try:
-            user = self.request.user
-            orders = Order.objects.filter(models.Q(customer_user__user__id=user.id) | models.Q(
-                business_user__user__id=user.id))
-            serializer = self.get_serializer(orders, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except NotFound:
+        user = self.request.user
+    # Hole das Profil des authentifizierten Benutzers
+        user_profile = user.profile  # Das Profil ist über das User-Modell verknüpft
+
+    # Filtere Bestellungen, bei denen der authentifizierte Benutzer entweder der customer_user oder business_user ist
+        orders = Order.objects.filter(
+            models.Q(customer_user=user_profile) | models.Q(
+                business_user=user_profile)
+        )
+
+    # Wenn keine Bestellungen gefunden werden, gib eine 404 zurück
+        if not orders.exists():
             return Response({
-                "message": "Order not found"
+                "message": "No orders found."
             }, status=status.HTTP_404_NOT_FOUND)
+
+    # Serialisiere die Bestellungen und gebe sie zurück
+        serializer = self.get_serializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         serializer = CreateOrderSerializer(

@@ -26,11 +26,12 @@ class CreateOrderSerializer(serializers.Serializer):
         offer_detail = OfferDetail.objects.get(
             pk=validated_data['offer_detail_id'])
 
-    # Hole das Profile-Objekt für den customer_user und business_user
+        # Hole das Profile-Objekt für den customer_user und business_user
         customer_user_profile = self.context['request'].user.profile
         business_user_profile = offer_detail.user  # Dies ist ein Profile-Objekt
 
-        return Order.objects.create(
+        # Erstelle die Bestellung
+        order = Order.objects.create(
             customer_user=customer_user_profile,  # Übergib das Profile-Objekt
             business_user=business_user_profile,  # Auch hier das Profile-Objekt
             title=offer_detail.title,
@@ -41,3 +42,5 @@ class CreateOrderSerializer(serializers.Serializer):
             offer_type=offer_detail.offer_type,
             status="in_progress"
         )
+
+        return order

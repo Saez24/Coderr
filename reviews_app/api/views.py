@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import ReviewSerializer
 from reviews_app.models import Review
 from rest_framework.exceptions import ValidationError
+from profile_app.models import Profile
 
 
 class ReviewListCreateView(generics.ListCreateAPIView):
@@ -25,10 +26,9 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         reviewer_id = self.request.query_params.get('reviewer_id')
         business_user_id = self.request.query_params.get('business_user_id')
 
-    # Sicherstellen, dass reviewer_id eine Zahl ist
         if reviewer_id:
             try:
-                reviewer_id = int(reviewer_id)  # Umwandlung in eine ganze Zahl
+                reviewer_id = int(reviewer_id)
                 queryset = queryset.filter(reviewer=reviewer_id)
             except ValueError:
                 raise ValidationError(
@@ -45,9 +45,12 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
-        business_user_id = self.request.data.get('business_user')
-        serializer.save(reviewer=self.request.user.pk,
-                        business_user=business_user_id)
+        print("perform_create called")
+        reviewer = serializer.validated_data.get('reviewer')
+        business_user = serializer.validated_data.get('business_user')
+        print("Reviewer:", reviewer)
+        print("Business User:", business_user)
+        serializer.save(reviewer=reviewer, business_user=business_user)
 
 
 class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
