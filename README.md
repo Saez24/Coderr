@@ -50,6 +50,11 @@ This is the backend for the Coderr application, developed with Django and the Dj
    Username: kevin
    Password: asdasd24
 
+   |               | Username | Password |
+   | ------------- | -------- | -------- |
+   | Customer-User | andrey   | asdasd   |
+   | Business-User | kevin    | asdasd24 |
+
 6. **Start the development server:**
 
    ```bash
