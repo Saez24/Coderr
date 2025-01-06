@@ -39,11 +39,26 @@ class ProfileViewSets(generics.ListCreateAPIView):
             if not (request.user == user or request.user.is_staff):
                 raise PermissionDenied(
                     "Not allowed to edit this profile.")
-            serializer = ProfileSerializer(
+            profile_serializer = ProfileSerializer(
                 profile, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            profile_serializer.is_valid(raise_exception=True)
+            profile_serializer.save()
+
+            # Aktualisiere auch den User
+            user_data = {}
+            if 'first_name' in request.data:
+                user_data['first_name'] = request.data['first_name']
+            if 'last_name' in request.data:
+                user_data['last_name'] = request.data['last_name']
+            if 'email' in request.data:
+                user_data['email'] = request.data['email']
+            if user_data:
+                user_serializer = UserSerializer(
+                    user, data=user_data, partial=True)
+                user_serializer.is_valid(raise_exception=True)
+                user_serializer.save()
+
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
         except NotFound:
             return Response({
                 "detail": "Profile not found"

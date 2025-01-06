@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from offers_app.models import Offer, OfferDetail
 from .serializers import OfferSerializer, OfferDetailSerializer
 from django.db.models import Q
@@ -69,7 +69,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user.profile)
+        serializer.save(user=self.request.user.profile.pk)
 
     def perform_destroy(self, instance):
         instance.delete()

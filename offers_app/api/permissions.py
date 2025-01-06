@@ -4,8 +4,14 @@ from profile_app.models import Profile
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.user.pk == obj.user or request.user.is_staff:
-            return True
+        try:
+            profile = Profile.objects.get(user=request.user)
+            if profile.type == "business" and profile == obj.user:
+                return True
+            if request.user.is_staff:
+                return True
+        except Profile.DoesNotExist:
+            return False
         return False
 
 

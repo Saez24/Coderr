@@ -36,11 +36,19 @@ This is the backend for the Coderr application, developed with Django and the Dj
    python manage.py migrate
    ```
 
-5. **Create a superuser (optional):**
+5. **Create guest Users and Superuser:**
 
    ```bash
-   python manage.py createsuperuser
+   python manage.py create_users.py
    ```
+
+   \*\*\*Customer-User
+   Username: andrey
+   Password: asdasd
+
+   \*\*\*Businnes-User
+   Username: kevin
+   Password: asdasd24
 
 6. **Start the development server:**
 
@@ -49,6 +57,11 @@ This is the backend for the Coderr application, developed with Django and the Dj
    ```
 
    The application will be accessible at `http://127.0.0.1:8000/`.
+
+   The Backend will be accessible at `http://127.0.0.1:8000/admin`.
+
+   Username: admin
+   Password: admin123
 
 ## Applications
 
