@@ -7,6 +7,7 @@ from .serializers import ReviewSerializer
 from reviews_app.models import Review
 from rest_framework.exceptions import ValidationError
 from profile_app.models import Profile
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class ReviewListCreateView(generics.ListCreateAPIView):
@@ -45,12 +46,19 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
-        print("perform_create called")
-        reviewer = serializer.validated_data.get('reviewer')
+        # Setze den aktuellen User als Reviewer
+        reviewer = self.request.user
+        # Extrahiere die ID von `business_user`, falls ein Objekt übergeben wird
         business_user = serializer.validated_data.get('business_user')
-        print("Reviewer:", reviewer)
-        print("Business User:", business_user)
-        serializer.save(reviewer=reviewer, business_user=business_user)
+
+        if isinstance(business_user, dict):
+            business_user = business_user.get('pk')
+
+        if not business_user:
+            raise ValidationError(
+                "Das Feld 'business_user' ist erforderlich und muss eine ID enthalten.")
+
+        serializer.save(reviewer=self.request.user)
 
 
 class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -59,14 +67,21 @@ class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method in ['PATCH', 'DELETE']:
-            return [permissions.IsAuthenticated(), IsReviewerOrAdmin()]
-        return [permissions.AllowAny()]
+            permission_classes = [IsAuthenticated, IsReviewerOrAdmin]
+        return [permission() for permission in permission_classes]
 
     def partial_update(self, request, *args, **kwargs):
         self.kwargs['partial'] = True
-        return self.update(request, *args, **kwargs)
+        review = self.get_object()
+        reviewer = review.reviewer
+        business_user = review.business_user
+        serializer = self.get_serializer(
+            review, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(reviewer=reviewer, business_user=business_user)
+        return Response(serializer.data)
 
     def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
+        request = self.get_object()
+        request.delete()
         return Response(status=HTTP_204_NO_CONTENT)

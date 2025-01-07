@@ -4,7 +4,22 @@ from profile_app.models import Profile
 
 class IsReviewerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return obj.reviewer == request.user.pk or request.user.is_staff
+        try:
+            # Überprüfen, ob der aktuelle Benutzer der Reviewer ist
+            reviewer_profile = Profile.objects.get(user=request.user)
+
+            # Überprüfen, ob der Reviewer mit dem Benutzer des Objekts übereinstimmt
+            if reviewer_profile.user == obj.reviewer:
+                return True
+
+            # Überprüfen, ob der Benutzer ein Administrator ist
+            if request.user.is_staff:
+                return True
+        except Profile.DoesNotExist:
+            # Falls `obj.reviewer` oder andere Attribute nicht existieren
+            return False
+
+        return False
 
 
 class IsCustomerProfile(permissions.BasePermission):

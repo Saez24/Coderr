@@ -34,31 +34,19 @@ class ProfileViewSets(generics.ListCreateAPIView):
     def patch(self, request, *args, **kwargs):
         pk = self.kwargs.get('pk')
         user = User.objects.get(pk=pk)
+
         try:
             profile = Profile.objects.get(user=pk)
             if not (request.user == user or request.user.is_staff):
-                raise PermissionDenied(
-                    "Not allowed to edit this profile.")
-            profile_serializer = ProfileSerializer(
-                profile, data=request.data, partial=True)
-            profile_serializer.is_valid(raise_exception=True)
-            profile_serializer.save()
+                raise PermissionDenied("Not allowed to edit this profile.")
 
-            # Aktualisiere auch den User
-            user_data = {}
-            if 'first_name' in request.data:
-                user_data['first_name'] = request.data['first_name']
-            if 'last_name' in request.data:
-                user_data['last_name'] = request.data['last_name']
-            if 'email' in request.data:
-                user_data['email'] = request.data['email']
-            if user_data:
-                user_serializer = UserSerializer(
-                    user, data=user_data, partial=True)
-                user_serializer.is_valid(raise_exception=True)
-                user_serializer.save()
+            # Profil aktualisieren
+            profile_data = self.update_profile(profile, request.data)
 
-            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+            # Benutzer aktualisieren
+            self.update_user(user, request.data)
+
+            return Response(profile_data, status=status.HTTP_200_OK)
         except NotFound:
             return Response({
                 "detail": "Profile not found"
@@ -71,6 +59,28 @@ class ProfileViewSets(generics.ListCreateAPIView):
             return Response({
                 "errors": e.detail
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update_profile(self, profile, data):
+        profile_serializer = ProfileSerializer(
+            profile, data=data, partial=True)
+        profile_serializer.is_valid(raise_exception=True)
+        profile_serializer.save()
+        return profile_serializer.data
+
+    def update_user(self, user, data):
+        user_data = {}
+        if 'first_name' in data:
+            user_data['first_name'] = data['first_name']
+        if 'last_name' in data:
+            user_data['last_name'] = data['last_name']
+        if 'email' in data:
+            user_data['email'] = data['email']
+
+        if user_data:
+            user_serializer = UserSerializer(
+                user, data=user_data, partial=True)
+            user_serializer.is_valid(raise_exception=True)
+            user_serializer.save()
 
 
 class ProfileCustomerViewSets(APIView):
