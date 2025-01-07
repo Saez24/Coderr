@@ -33,13 +33,14 @@ This is the backend for the Coderr application, developed with Django and the Dj
 4. **Apply database migrations:**
 
    ```bash
+   python manage.py makemigration
    python manage.py migrate
    ```
 
-5. **Create guest Users and Superuser:**
+5. **For testing create guest Users and Superuser:**
 
    ```bash
-   python manage.py create_users.py
+   python manage.py create_users
    ```
 
 6. **Start the development server:**
@@ -48,13 +49,13 @@ This is the backend for the Coderr application, developed with Django and the Dj
    python manage.py runserver
    ```
 
-   The application will be accessible at `http://127.0.0.1:8000/`.
+   The application will be accessible at `http://127.0.0.1:8000/`
 
-   The Backend will be accessible at `http://127.0.0.1:8000/admin`.
+   The Backend will be accessible at `http://127.0.0.1:8000/admin`
 
-   | Superusers | Username | Password |
-   | ---------- | -------- | -------- |
-   | Admin      | admin    | admin123 |
+   | Superuser | Username | Password |
+   | --------- | -------- | -------- |
+   | Admin     | admin    | admin123 |
 
    | Users         | Username | Password |
    | ------------- | -------- | -------- |
