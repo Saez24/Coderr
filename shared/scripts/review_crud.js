@@ -6,7 +6,6 @@ async function setReviewsForBusinessUser(id) {
     let reviewsResp = await getData(REVIEW_URL + `?business_user_id=${id.pk}&ordering=${currentReviewOrdering}`);
     if (reviewsResp.ok) {
         currentReviews = reviewsResp.data;
-        console.log(currentReviews);
 
     } else {
         showToastMessage(true, ['Bewertung zu diesem User konnte nicht gefunden werden'])
@@ -23,26 +22,19 @@ async function setReviewsForCustomerUser(id) {
 }
 
 async function createReview(data) {
-    // Konvertiere business_user in ID
-    if (data.business_user && typeof data.business_user === 'object') {
-        data.business_user = data.business_user.pk;
-    }
-    data.reviewer = currentUser.user.pk;
-
-    let index = currentReviews.findIndex(item => item.reviewer === currentUser.user.pk);
-
+    let index = currentReviews.findIndex(item => item.reviewer === currentUser.user);
     if (index >= 0) {
-        showToastMessage(true, ['Du hast diesen User schon einmal Bewertet']);
-        return { ok: false };
+        showToastMessage(true, ['Du hast diesen User schon einmal Bewertet'])
+        return { ok: false }
     } else {
         let reviewsResp = await postDataWJSON(REVIEW_URL, data);
         if (reviewsResp.ok) {
             currentReviews.push(reviewsResp.data);
-            showToastMessage(false, ['Bewertung erstellt']);
-            return reviewsResp;
+            showToastMessage(false, ['Bewertung erstellt'])
+            return reviewsResp
         } else {
-            showToastMessage(true, extractErrorMessages(reviewsResp.data));
-            return reviewsResp;
+            showToastMessage(true, extractErrorMessages(reviewsResp.data))
+            return reviewsResp
         }
     }
 }
