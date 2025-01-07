@@ -49,7 +49,7 @@ This is the backend for the Coderr application, developed with Django and the Dj
    python manage.py runserver
    ```
 
-   The application will be accessible at `http://127.0.0.1:8000/`
+   The application is available at `https://github.com/Saez24/Coderr_Frontend`
 
    The Backend will be accessible at `http://127.0.0.1:8000/admin`
 
