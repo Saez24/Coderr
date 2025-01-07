@@ -36,22 +36,6 @@ class Command(BaseCommand):
             }
         )
 
-    # def create_superuser(self, username, password, profile_type, email):
-    #     if not User.objects.filter(username=username).exists():
-    #         # Superuser erstellen
-    #         user = User.objects.create_superuser(
-    #             username=username, password=password, email=email)
-    #         token, created = Token.objects.get_or_create(user=user)
-
-    #     profile, created = Profile.objects.get_or_create(
-    #         user=user,
-    #         defaults={
-    #             'username': username,
-    #             'type': profile_type,
-    #             'email': email,
-    #         }
-    #     )
-
         # Felder explizit setzen, falls das Profil schon existiert
         if not created:
             profile.username = username
@@ -63,12 +47,3 @@ class Command(BaseCommand):
             f'Successfully created {profile_type} superuser and profile for {
                 username} with token {token.key}'
         ))
-
-        # # Create Superuser
-        # if not User.objects.filter(username='admin').exists():
-        #     superuser = User.objects.create_superuser(
-        #         username='admin', password='admin123')
-        #     Profile.objects.create(
-        #         user=superuser, username='admin', )
-        #     self.stdout.write(self.style.SUCCESS(
-        #         'Successfully created superuser and profile'))
