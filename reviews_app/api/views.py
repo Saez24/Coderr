@@ -66,9 +66,9 @@ class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
 
     def get_permissions(self):
+        permission_classes = [IsAuthenticated, IsReviewerOrAdmin]
         if self.request.method in ['PATCH', 'DELETE']:
-            permission_classes = [IsAuthenticated, IsReviewerOrAdmin]
-        return [permission() for permission in permission_classes]
+            return [permission() for permission in permission_classes]
 
     def partial_update(self, request, *args, **kwargs):
         self.kwargs['partial'] = True
