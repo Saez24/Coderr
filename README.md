@@ -21,5 +21,5 @@ Both are included as Git submodules in this project.
 To clone this repository along with its submodules, use:
 
 ```bash
-git clone --recurse-submodules https://github.com/Saez24/Coderr.git
+git clone https://github.com/Saez24/Coderr.git
 ```
